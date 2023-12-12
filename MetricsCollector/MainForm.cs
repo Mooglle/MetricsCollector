@@ -12,6 +12,8 @@ namespace MetricsCollector
 {
 	public partial class MainForm : Form
 	{
+		List<ClassInfo> classInfos;
+		MetricsContainer metricsContainer;
 		public MainForm()
 		{
 			InitializeComponent();
@@ -24,8 +26,6 @@ namespace MetricsCollector
 
 		private void button1_Click(object sender, EventArgs e)
 		{
-			List<ClassInfo> classInfos;
-			MetricsContainer metricsContainer;
 			(classInfos, metricsContainer) = new ProjectAnalyzer().Analyze();
 
 			listViewClassInfo.Items.Clear();
@@ -33,46 +33,69 @@ namespace MetricsCollector
 			listViewMetrics.Items.Clear();
 			listViewMetrics.Columns.Clear();
 
-			listViewClassInfo.Columns.AddRange(new ColumnHeader[] {
-				new ColumnHeader() { Text = "ClassName" },
-				new ColumnHeader() { Text = "Methods" },
-				new ColumnHeader() { Text = "Public methods" },
-				new ColumnHeader() { Text = "Private methods" },
-				new ColumnHeader() { Text = "User defined public methods" },
-				new ColumnHeader() { Text = "User defined private methods" },
-				new ColumnHeader() { Text = "Overridden methods" },
-			});
-			foreach (var info in classInfos)
+			SetListViewClassInfosColumns();
+			SetListViewClassInfosRows();
+
+			SetListViewMetricsColumns();
+			SetListViewMetricsRows();
+		}
+
+		private void SetListViewClassInfosColumns()
+		{
+			List<ColumnHeader> classInfoColumns = new List<ColumnHeader>();
+			foreach (var property in typeof(ClassInfo).GetProperties())
 			{
-				var item = new ListViewItem(new string[] {
-					info.ClassName,
-					info.MethodsInfo.Count().ToString(),
-					info.PublicMethodsInfo.Count().ToString(),
-					info.PrivateMethodsInfo.Count().ToString(),
-					info.MethodsInfo.Count(m => m.IsPublic && !m.IsVirtual).ToString(),
-					info.MethodsInfo.Count(m => m.IsPrivate && !m.IsVirtual).ToString(),
-					info.OverriddenMethodsInfo.Count().ToString(),
-				});
+				classInfoColumns.Add(new ColumnHeader() { Text = property.Name });
+			}
+			listViewClassInfo.Columns.AddRange(classInfoColumns.ToArray());
+		}
+		private void SetListViewClassInfosRows()
+		{
+			var classInfoProperties = typeof(ClassInfo).GetProperties().ToArray();
+			for (int i = 0; i < classInfos.Count; i++)
+			{
+				List<string> classInfosRow = new List<string>();
+
+				foreach (var property in classInfoProperties)
+				{
+					var p = property.GetValue(classInfos[i], null);
+					if (p.GetType().IsArray)
+					{
+						classInfosRow.Add(((Array)p).Length.ToString());
+					}
+					else
+					{
+						classInfosRow.Add(p.ToString());
+					}
+				}
+				var item = new ListViewItem(classInfosRow.ToArray());
+
 				listViewClassInfo.Items.Add(item);
 			}
-
-
-			listViewMetrics.Columns.AddRange(new ColumnHeader[] {
-				new ColumnHeader() { Text = "ClassName" },
-				new ColumnHeader() { Text = "CS" },
-				new ColumnHeader() { Text = "NOO" },
-				new ColumnHeader() { Text = "NOA" },
-				new ColumnHeader() { Text = "SI" },
-			});
+		}
+		private void SetListViewMetricsColumns()
+		{
+			List<ColumnHeader> metricsColumns = new List<ColumnHeader>() { new ColumnHeader() { Text = "ClassName" } };
+			foreach (var property in typeof(MetricsContainer).GetProperties())
+			{
+				metricsColumns.Add(new ColumnHeader() { Text = property.Name });
+			}
+			listViewMetrics.Columns.AddRange(metricsColumns.ToArray());
+		}
+		private void SetListViewMetricsRows()
+		{
+			var properties = typeof(MetricsContainer).GetProperties().Where(p => p.PropertyType == typeof(List<Metric>)).ToArray();
 			for (int i = 0; i < metricsContainer.CS.Count; i++)
 			{
-				var item = new ListViewItem(new string[] {
-					metricsContainer.CS[i].Description,
-					metricsContainer.CS[i].Value.ToString(),
-					metricsContainer.NOO[i].Value.ToString(),
-					metricsContainer.NOA[i].Value.ToString(),
-					metricsContainer.SI[i].Value.ToString(),
-				});
+				List<string> metricsRow = new List<string>() { metricsContainer.CS[i].Description };
+
+				foreach (var property in properties)
+				{
+					var p = (List<Metric>)property.GetValue(metricsContainer, null);
+					if (p.Count > i)
+						metricsRow.Add(p[i].Value.ToString());
+				}
+				var item = new ListViewItem(metricsRow.ToArray());
 
 				listViewMetrics.Items.Add(item);
 			}

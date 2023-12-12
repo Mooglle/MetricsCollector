@@ -70,6 +70,13 @@ namespace MetricsCollector
 						Description = type.FullName,
 						Value = (double)(overriddenMethods.Count() * GetInheritanceLevel(type)) / methodsInfo.Count(), 
 					});
+
+					resultMetrics.SI.Add(new Metric()
+					{
+						Name = "Specialization index",
+						Description = type.FullName,
+						Value = (double)(overriddenMethods.Count() * GetInheritanceLevel(type)) / methodsInfo.Count(),
+					});
 				}
 			}
 			return (resultClassInfo, resultMetrics);

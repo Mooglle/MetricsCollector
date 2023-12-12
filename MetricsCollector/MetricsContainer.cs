@@ -12,6 +12,7 @@ namespace MetricsCollector
 		public List<Metric> NOO { get; set; } = new List<Metric>();
 		public List<Metric> NOA { get; set; } = new List<Metric>();
 		public List<Metric> SI { get; set; } = new List<Metric>();
+		public List<Metric> AOS { get; set; } = new List<Metric>();
 		public MetricsContainer() { }
 	}
 }
