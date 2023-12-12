@@ -21,12 +21,14 @@ namespace MetricsCollector
 
 		private void Form1_Load(object sender, EventArgs e)
 		{
-			int a = 1;
+
 		}
 
 		private void button1_Click(object sender, EventArgs e)
 		{
-			(classInfos, metricsContainer) = new ProjectAnalyzer().Analyze();
+			(classInfos, metricsContainer) = new ProjectAnalyzer().Analyze(textBoxAssemblyPath.Text, textBoxProjectPath.Text);
+			if (classInfos == null || metricsContainer == null)
+				return;
 
 			listViewClassInfo.Items.Clear();
 			listViewClassInfo.Columns.Clear();

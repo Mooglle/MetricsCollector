@@ -31,11 +31,15 @@
 			this.button1 = new System.Windows.Forms.Button();
 			this.listViewClassInfo = new System.Windows.Forms.ListView();
 			this.listViewMetrics = new System.Windows.Forms.ListView();
+			this.textBoxAssemblyPath = new System.Windows.Forms.TextBox();
+			this.textBoxProjectPath = new System.Windows.Forms.TextBox();
+			this.label1 = new System.Windows.Forms.Label();
+			this.label2 = new System.Windows.Forms.Label();
 			this.SuspendLayout();
 			// 
 			// button1
 			// 
-			this.button1.Location = new System.Drawing.Point(122, 280);
+			this.button1.Location = new System.Drawing.Point(107, 509);
 			this.button1.Name = "button1";
 			this.button1.Size = new System.Drawing.Size(75, 23);
 			this.button1.TabIndex = 0;
@@ -63,11 +67,50 @@
 			this.listViewMetrics.UseCompatibleStateImageBehavior = false;
 			this.listViewMetrics.View = System.Windows.Forms.View.Details;
 			// 
+			// textBoxAssemblyPath
+			// 
+			this.textBoxAssemblyPath.Location = new System.Drawing.Point(47, 318);
+			this.textBoxAssemblyPath.Name = "textBoxAssemblyPath";
+			this.textBoxAssemblyPath.Size = new System.Drawing.Size(195, 22);
+			this.textBoxAssemblyPath.TabIndex = 3;
+			this.textBoxAssemblyPath.Text = "C:\\Users\\Moogle\\Downloads\\Telegram Desktop\\13 laba\\13 laba\\laba 8\\bin\\Debug\\laba " +
+    "8.dll";
+			// 
+			// textBoxProjectPath
+			// 
+			this.textBoxProjectPath.Location = new System.Drawing.Point(47, 408);
+			this.textBoxProjectPath.Name = "textBoxProjectPath";
+			this.textBoxProjectPath.Size = new System.Drawing.Size(195, 22);
+			this.textBoxProjectPath.TabIndex = 4;
+			this.textBoxProjectPath.Text = "C:\\Users\\Moogle\\Downloads\\Telegram Desktop\\13 laba\\13 laba\\laba 8";
+			// 
+			// label1
+			// 
+			this.label1.AutoSize = true;
+			this.label1.Location = new System.Drawing.Point(47, 271);
+			this.label1.Name = "label1";
+			this.label1.Size = new System.Drawing.Size(97, 16);
+			this.label1.TabIndex = 5;
+			this.label1.Text = "Assembly Path";
+			// 
+			// label2
+			// 
+			this.label2.AutoSize = true;
+			this.label2.Location = new System.Drawing.Point(47, 367);
+			this.label2.Name = "label2";
+			this.label2.Size = new System.Drawing.Size(79, 16);
+			this.label2.TabIndex = 6;
+			this.label2.Text = "Project Path";
+			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(1110, 584);
+			this.Controls.Add(this.label2);
+			this.Controls.Add(this.label1);
+			this.Controls.Add(this.textBoxProjectPath);
+			this.Controls.Add(this.textBoxAssemblyPath);
 			this.Controls.Add(this.listViewMetrics);
 			this.Controls.Add(this.listViewClassInfo);
 			this.Controls.Add(this.button1);
@@ -75,6 +118,7 @@
 			this.Text = "Form1";
 			this.Load += new System.EventHandler(this.Form1_Load);
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 
@@ -83,6 +127,10 @@
 		private System.Windows.Forms.Button button1;
 		private System.Windows.Forms.ListView listViewClassInfo;
 		private System.Windows.Forms.ListView listViewMetrics;
+		private System.Windows.Forms.TextBox textBoxAssemblyPath;
+		private System.Windows.Forms.TextBox textBoxProjectPath;
+		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.Label label2;
 	}
 }
 
