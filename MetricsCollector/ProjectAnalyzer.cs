@@ -106,7 +106,13 @@ namespace MetricsCollector
 					{
 						Name = "Average number of parameters",
 						Description = type.FullName,
-						Value = 0,
+						Value = new Func<MethodInfo[], double>(x => {
+							int prms = 0;
+							foreach (var mi in x) {
+								prms += mi.GetParameters().Count();
+							}
+							return (double)prms / x.Count();
+						})(methodsInfo),
 					});
 
 				}
