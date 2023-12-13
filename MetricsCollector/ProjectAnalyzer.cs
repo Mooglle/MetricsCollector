@@ -115,9 +115,20 @@ namespace MetricsCollector
 						})(methodsInfo),
 					});
 
+					resultMetrics.Jilb.Add(new Metric()
+					{
+						Name = "Jilb",
+						Description = type.FullName,
+						Value = CalculateJilb(projectPath),
+					});
 				}
 			}
 			return (resultClassInfo, resultMetrics);
+		}
+		private double CalculateJilb(string projectPath)
+		{
+			double result = 0;
+			return result;
 		}
 		/*
  * 

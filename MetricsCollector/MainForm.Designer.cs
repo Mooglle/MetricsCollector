@@ -35,6 +35,7 @@
 			this.textBoxProjectPath = new System.Windows.Forms.TextBox();
 			this.label1 = new System.Windows.Forms.Label();
 			this.label2 = new System.Windows.Forms.Label();
+			this.treeView1 = new System.Windows.Forms.TreeView();
 			this.SuspendLayout();
 			// 
 			// button1
@@ -52,7 +53,7 @@
 			this.listViewClassInfo.HideSelection = false;
 			this.listViewClassInfo.Location = new System.Drawing.Point(28, 12);
 			this.listViewClassInfo.Name = "listViewClassInfo";
-			this.listViewClassInfo.Size = new System.Drawing.Size(1070, 227);
+			this.listViewClassInfo.Size = new System.Drawing.Size(775, 227);
 			this.listViewClassInfo.TabIndex = 1;
 			this.listViewClassInfo.UseCompatibleStateImageBehavior = false;
 			this.listViewClassInfo.View = System.Windows.Forms.View.Details;
@@ -62,7 +63,7 @@
 			this.listViewMetrics.HideSelection = false;
 			this.listViewMetrics.Location = new System.Drawing.Point(283, 245);
 			this.listViewMetrics.Name = "listViewMetrics";
-			this.listViewMetrics.Size = new System.Drawing.Size(815, 327);
+			this.listViewMetrics.Size = new System.Drawing.Size(965, 327);
 			this.listViewMetrics.TabIndex = 2;
 			this.listViewMetrics.UseCompatibleStateImageBehavior = false;
 			this.listViewMetrics.View = System.Windows.Forms.View.Details;
@@ -102,11 +103,19 @@
 			this.label2.TabIndex = 6;
 			this.label2.Text = "Project Path";
 			// 
+			// treeView1
+			// 
+			this.treeView1.Location = new System.Drawing.Point(809, 12);
+			this.treeView1.Name = "treeView1";
+			this.treeView1.Size = new System.Drawing.Size(439, 227);
+			this.treeView1.TabIndex = 7;
+			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(1110, 584);
+			this.ClientSize = new System.Drawing.Size(1260, 584);
+			this.Controls.Add(this.treeView1);
 			this.Controls.Add(this.label2);
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.textBoxProjectPath);
@@ -131,6 +140,7 @@
 		private System.Windows.Forms.TextBox textBoxProjectPath;
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.TreeView treeView1;
 	}
 }
 

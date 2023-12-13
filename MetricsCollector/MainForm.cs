@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
 
 namespace MetricsCollector
 {
@@ -34,12 +36,15 @@ namespace MetricsCollector
 			listViewClassInfo.Columns.Clear();
 			listViewMetrics.Items.Clear();
 			listViewMetrics.Columns.Clear();
+			treeView1.Nodes.Clear();
 
 			SetListViewClassInfosColumns();
 			SetListViewClassInfosRows();
 
 			SetListViewMetricsColumns();
 			SetListViewMetricsRows();
+
+			SetTreeView();
 		}
 
 		private void SetListViewClassInfosColumns()
@@ -50,6 +55,33 @@ namespace MetricsCollector
 				classInfoColumns.Add(new ColumnHeader() { Text = property.Name });
 			}
 			listViewClassInfo.Columns.AddRange(classInfoColumns.ToArray());
+		}
+		private void SetTreeView()
+		{
+			var classInfoProperties = typeof(ClassInfo).GetProperties().ToArray();
+			for (int i = 0; i < classInfos.Count; i++)
+			{
+				TreeNode nodeClass = new TreeNode(classInfos[i].ClassName);
+
+				foreach (var property in classInfoProperties)
+				{
+					TreeNode nodeProperty = new TreeNode(property.Name);
+					nodeClass.Nodes.Add(nodeProperty);
+					var p = property.GetValue(classInfos[i], null);
+					if (p.GetType().IsArray)
+					{
+						foreach (var el in (Array)p)
+						{
+							nodeProperty.Nodes.Add(el.ToString());
+						}
+					}
+					else
+					{
+						nodeProperty.Nodes.Add(p.ToString());
+					}
+				}
+				treeView1.Nodes.Add(nodeClass);
+			}
 		}
 		private void SetListViewClassInfosRows()
 		{

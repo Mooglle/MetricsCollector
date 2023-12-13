@@ -15,6 +15,7 @@ namespace MetricsCollector
 		public List<Metric> AOS { get; set; } = new List<Metric>();
 		public List<Metric> OC { get; set; } = new List<Metric>();
 		public List<Metric> ANP { get; set; } = new List<Metric>();
+		public List<Metric> Jilb { get; set; } = new List<Metric>();
 		public MetricsContainer() { }
 	}
 }
