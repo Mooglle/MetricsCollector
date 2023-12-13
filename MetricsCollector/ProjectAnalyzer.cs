@@ -11,6 +11,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Remoting.Activation;
 using System.IO;
 using System.Windows.Forms;
+using System.Text.RegularExpressions;
 
 namespace MetricsCollector
 {
@@ -37,6 +38,7 @@ namespace MetricsCollector
 			Type[] types = assembly.GetTypes();
 
 			var aos = CalculateAOS(projectPath);
+			var oc = CalculateOC(projectPath);
 
 			foreach (Type type in types)
 			{
@@ -56,7 +58,7 @@ namespace MetricsCollector
 						PrivateMethodsInfo = methodsInfo.Where(m => m.IsPrivate).ToArray(),
 						OverriddenMethodsInfo = overriddenMethods,
 						NotInheritedMethodsInfo = notInheritedMethods,
-				});
+					});
 
 					resultMetrics.CS.Add(new Metric()
 					{
@@ -97,7 +99,7 @@ namespace MetricsCollector
 					{
 						Name = "Operation complexity",
 						Description = type.FullName,
-						Value = 0,
+						Value = oc.ContainsKey(type.FullName) ? oc[type.FullName] : 0,
 					});
 
 					resultMetrics.ANP.Add(new Metric()
@@ -110,6 +112,102 @@ namespace MetricsCollector
 				}
 			}
 			return (resultClassInfo, resultMetrics);
+		}
+		/*
+ * 
+Действие                                             Вес      Учитывается
+Определение (описание) переменной-параметра          0,3          Да
+Определение (описание) временной переменной          0,5          Да
+Присваивание значения                                0,5          Да
+Вложенное выражение                                  0,5          Нет
+Сообщение без параметров                             1            Да
+Арифметическая операция                              2            Да
+Сообщение с параметрами                              3            Да
+Вызов стандартной функции интерфейса (API)           5            Нет
+Вызов пользовательской функции (простой вызов)       7            Нет
+ * 
+ */
+		private Dictionary<string, double> CalculateOC(string projectPath)
+		{
+			Dictionary<string, double> result = new Dictionary<string, double>();
+			int numVarParams = 0;
+			int numTempParams = 0;
+			int numAssignments = 0;
+			int numMessages = 0;
+			int numParamMessages = 0;
+			int numMathOps = 0;
+
+			foreach (var file in Directory.GetFiles(projectPath, "*.cs", SearchOption.AllDirectories))
+			{
+				if (file.Contains("Designer.cs"))
+					continue;
+				using (StreamReader sr = new StreamReader(file))
+				{
+					string prevInput = "";
+					string input = "";
+					string[] className = new string[2];
+					while (!sr.EndOfStream)
+					{
+						prevInput = input;
+						input = sr.ReadLine();
+						if (input.Contains("namespace"))
+						{
+							string[] s = input.Trim().Split(' ');
+							className[0] = s[1] + '.';
+							continue;
+						}
+						if (input.Contains("class"))
+						{
+							string[] s = input.Trim().Split(' ');
+							for (int i = 0; i < s.Length; i++)
+							{
+								if (s[i] == "class")
+									className[1] = s[i + 1];
+							}
+							continue;
+						}
+						if (Regex.Matches(input, @"^\ {8}\w").Count > 0)
+						{
+							continue;
+						}
+						numAssignments += Regex.Matches(input, @" = ").Count;
+						numAssignments += Regex.Matches(input, @"\+\=").Count;
+						numAssignments += Regex.Matches(input, @"\-\=").Count;
+						numAssignments += Regex.Matches(input, @"\*\=").Count;
+						numAssignments += Regex.Matches(input, @"\/\=").Count;
+						numMathOps += Regex.Matches(input, @" \- ").Count;
+						numMathOps += Regex.Matches(input, @" \+ ").Count;
+						numMathOps += Regex.Matches(input, @" \/ ").Count;
+						numMathOps += Regex.Matches(input, @" \* ").Count;
+						numMathOps += Regex.Matches(input, @" \% ").Count;
+						numMathOps += Regex.Matches(input, @"\+\+").Count;
+						numMathOps += Regex.Matches(input, @"\-\-").Count;
+						numMathOps += Regex.Matches(input, @"\-\=").Count;
+						numMathOps += Regex.Matches(input, @"\+\=").Count;
+						numMathOps += Regex.Matches(input, @"\*\=").Count;
+						numMathOps += Regex.Matches(input, @"\/\=").Count;
+						numMessages += Regex.Matches(input, @"\w+\(\)").Count;
+						numParamMessages += Regex.Matches(input, @"\w+\(\w").Count;
+					}
+					var name = className[0] + className[1];
+					double oc = 0.3 * numVarParams + 0.5 * numTempParams + 0.5 * numAssignments + numMessages + 2 * numMathOps + 3 * numParamMessages;
+					if (!result.ContainsKey(name))
+					{
+						result.Add(name, oc);
+					}
+					else
+					{
+						result[name] += oc;
+					}
+					numVarParams = 0;
+					numTempParams = 0;
+					numAssignments = 0;
+					numMessages = 0;
+					numParamMessages = 0;
+					numMathOps = 0;
+				}
+			}
+			return result;
 		}
 		private Dictionary<string, double> CalculateAOS(string projectPath)
 		{
