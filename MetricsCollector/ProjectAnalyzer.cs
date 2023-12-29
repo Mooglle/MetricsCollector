@@ -39,10 +39,11 @@ namespace MetricsCollector
 
 			var aos = CalculateAOS(projectPath);
 			var oc = CalculateOC(projectPath);
+			var jilb = CalculateJilb(projectPath);
 
 			foreach (Type type in types)
 			{
-				if (type.IsClass) // Check if the type is a class
+				if (type.IsClass)
 				{
 					var methodsInfo = type.GetMethods(BF.Public | BF.Instance | BF.NonPublic | BF.Static);
 					var propertiesInfo = type.GetProperties(BF.Public | BF.Instance | BF.NonPublic | BF.Static);
@@ -119,15 +120,97 @@ namespace MetricsCollector
 					{
 						Name = "Jilb",
 						Description = type.FullName,
-						Value = CalculateJilb(projectPath),
+						Value = jilb.ContainsKey(type.FullName) ? jilb[type.FullName] : 0,
 					});
 				}
 			}
 			return (resultClassInfo, resultMetrics);
 		}
-		private double CalculateJilb(string projectPath)
+
+		private Dictionary<string, double> CalculateJilb(string projectPath)
 		{
-			double result = 0;
+			Dictionary<string, double> result = new Dictionary<string, double>();
+			Dictionary<string, (int, int)> numsOps = new Dictionary<string, (int, int)>(); // tuple<ifelse, ops>
+			int numIf = 0;
+			int numElse = 0;
+			int numOtherOps = 0;
+
+			List<string> cSharpOperators = new List<string>() { @"\.", @"\w+\(\)", @"\w+\(\w", @"\[", @"\?\.", @"\?\[", @"\+\+", @"\-\-", 
+				@"\!", @"new", @"typeof", @"checked", @"unchecked", @"default", @"nameof", @"delegate", @"sizeof", "stackalloc",
+				@"\-\>", @"\~", @"(T)", @"await", @" \& ", @" \* ", @"true", @"false", @"switch", 
+				@"with", @" \/ ", @" \% ", @" \+ ", @" \- ", @" \<\< ", @" \>\> ", @" \>\>\> ", @" \< ", @" \> ", @" \<\= ",
+				@" \>\= ", @"is", @"as", @" \=\= ", @" \!\= ", @" \^ ", @" \| ", @" \&\& ", @" \|\| ", @" \?\? ", @" \? \w+ \: ", 
+				@" \= ", @" \+\= ", @" \-\= ", @" \*\= ", @" \/\= ", @" \%\= ", @" \&\= ", @" \|\= ", @" \^\= ", @" \<\<\= ",
+				@" \>\>\= ", @" \>\>\>\= ", @" \?\?\= ", @" \=\> " };
+
+			foreach (var file in Directory.GetFiles(projectPath, "*.cs", SearchOption.AllDirectories))
+			{
+				if (file.Contains("Designer.cs"))
+					continue;
+				using (StreamReader sr = new StreamReader(file))
+				{
+					string input = "";
+					string[] className = new string[2];
+					while (!sr.EndOfStream)
+					{
+						input = sr.ReadLine();
+						if (input == "")
+							continue;
+						if (input.Contains("using") && !input.Contains("("))
+						{
+							continue;
+						}
+						if (input.Contains("namespace"))
+						{
+							string[] s = input.Trim().Split(' ');
+							className[0] = s[1] + '.';
+							continue;
+						}
+						if (input.Contains("class"))
+						{
+							string[] s = input.Trim().Split(' ');
+							for (int i = 0; i < s.Length; i++)
+							{
+								if (s[i] == "class")
+									className[1] = s[i + 1];
+							}
+							continue;
+						}
+
+						numIf += Regex.Matches(input, @" if ").Count;
+						numElse += Regex.Matches(input, @" else ").Count;
+						foreach(var entry in cSharpOperators)
+						{
+							numOtherOps += Regex.Matches(input, entry).Count;
+						}				
+					}
+					var name = className[0] + className[1];
+
+					if (!numsOps.ContainsKey(name))
+					{
+						numsOps.Add(name, (numIf + numElse, numOtherOps));
+					}
+					else
+					{
+						(int a, int b) t = numsOps[name];
+						t.a += numIf + numElse;
+						t.b += numOtherOps;
+						numsOps[name] = t;
+					}
+					numIf = 0;
+					numElse = 0;
+					numOtherOps = 0;
+				}
+			}
+			foreach (var kv in numsOps)
+			{
+				if(kv.Value.Item2 == 0)
+				{
+					result.Add(kv.Key, 0);
+					continue;
+				}
+				result.Add(kv.Key, (double)kv.Value.Item1 / (kv.Value.Item2 + kv.Value.Item1));
+			}
 			return result;
 		}
 		/*
@@ -216,6 +299,7 @@ namespace MetricsCollector
 					{
 						result[name] += oc;
 					}
+
 					numVarParams = 0;
 					numTempParams = 0;
 					numAssignments = 0;

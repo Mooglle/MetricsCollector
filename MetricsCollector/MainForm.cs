@@ -31,7 +31,6 @@ namespace MetricsCollector
 			(classInfos, metricsContainer) = new ProjectAnalyzer().Analyze(textBoxAssemblyPath.Text, textBoxProjectPath.Text);
 			if (classInfos == null || metricsContainer == null)
 				return;
-
 			listViewClassInfo.Items.Clear();
 			listViewClassInfo.Columns.Clear();
 			listViewMetrics.Items.Clear();
